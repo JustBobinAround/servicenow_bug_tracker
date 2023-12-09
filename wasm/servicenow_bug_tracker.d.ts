@@ -6,6 +6,10 @@
 */
 export function is_passcode_correct(pass: string): boolean;
 /**
+* @returns {Promise<any>}
+*/
+export function build_bugsub(): Promise<any>;
+/**
 * @param {string} pass
 * @returns {Promise<any>}
 */
@@ -16,6 +20,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly is_passcode_correct: (a: number, b: number) => number;
+  readonly build_bugsub: () => number;
   readonly autofill_form: (a: number, b: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

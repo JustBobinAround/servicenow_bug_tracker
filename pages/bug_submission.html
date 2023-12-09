@@ -35,11 +35,12 @@
         <textarea id="additionalInformation" name="additionalInformation" required></textarea>
 
         <button class="bug-submission-button" type="submit", id="submit-button">Submit Bug</button>
+        <div id="submit-loading-spinner" class="loading"></div>
         <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
     </form>
     <pre id="jsonDisplay"></pre>
     <script type="module">
-        import init, { autofill_form, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
+        import init, { autofill_form, build_bugsub, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
         import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
         if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
             window.location.href="../index.html";
@@ -67,10 +68,14 @@
                     });
 
                     if (is_form_filled) {
-                        const jsonData = JSON.stringify(formDataObject);
-                        console.log(jsonData);
-                        document.getElementById("jsonDisplay").textContent = JSON.stringify(jsonData, null, 2);
-                        window.location.href="./bug_table.html";
+                        submit_button.style.display = 'none';
+                        document.getElementById('submit-loading-spinner').style.display = 'block';
+                        build_bugsub().then(result => {
+                            alert(result);
+                            submit_button.style.display = 'block';
+                            document.getElementById('submit-loading-spinner').style.display = 'none';
+                            window.location.href="./bug_table.html";
+                        });
                     }
                 });
                 var autofill_button = document.getElementById('autofill-button');

@@ -840,6 +840,7 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "openai_api",
+ "tokio",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",

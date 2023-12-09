@@ -220,6 +220,14 @@ export function is_passcode_correct(pass) {
 }
 
 /**
+* @returns {Promise<any>}
+*/
+export function build_bugsub() {
+    const ret = wasm.build_bugsub();
+    return takeObject(ret);
+}
+
+/**
 * @param {string} pass
 * @returns {Promise<any>}
 */
@@ -237,7 +245,7 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_83(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_86(arg0, arg1, arg2, arg3) {
     wasm.wasm_bindgen__convert__closures__invoke2_mut__h601cc7bef29c97b2(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
@@ -361,6 +369,13 @@ function __wbg_get_imports() {
         const ret = getObject(arg0).fetch(getObject(arg1));
         return addHeapObject(ret);
     };
+    imports.wbg.__wbg_textContent_2f37235e13f8484b = function(arg0, arg1) {
+        const ret = getObject(arg1).textContent;
+        var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len1 = WASM_VECTOR_LEN;
+        getInt32Memory0()[arg0 / 4 + 1] = len1;
+        getInt32Memory0()[arg0 / 4 + 0] = ptr1;
+    };
     imports.wbg.__wbg_instanceof_Response_4c3b1446206114d1 = function(arg0) {
         let result;
         try {
@@ -466,7 +481,7 @@ function __wbg_get_imports() {
                 const a = state0.a;
                 state0.a = 0;
                 try {
-                    return __wbg_adapter_83(a, state0.b, arg0, arg1);
+                    return __wbg_adapter_86(a, state0.b, arg0, arg1);
                 } finally {
                     state0.a = a;
                 }
@@ -534,8 +549,8 @@ function __wbg_get_imports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper316 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 109, __wbg_adapter_24);
+    imports.wbg.__wbindgen_closure_wrapper331 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 116, __wbg_adapter_24);
         return addHeapObject(ret);
     };
 

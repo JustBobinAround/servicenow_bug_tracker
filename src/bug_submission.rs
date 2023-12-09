@@ -1,15 +1,24 @@
 use openai_api::prelude::*;
 use wasm_bindgen::prelude::*;
 use wasm_env_crypt::prelude::*;
+use tokio::time::Duration;
+
+pub struct BugTableItem {
+}
  
 pub struct BugSub {
-    summary: String,
-    environment: String,
-    steps_to_reproduce: String,
-    expected_behavior: String,
     actual_behavior: String,
-    error_messages: String,
     additional_information: String,
+    assigned_to: String,
+    description: String,
+    environment: String,
+    error_messages: String,
+    expected_behavior: String,
+    recommend_user_actions: String,
+    steps_to_reproduce: String,
+    summary: String,
+    severity: String,
+    title: String,
 }
 
 
@@ -24,15 +33,77 @@ impl BugSub {
         format!("{}\nAdditional Information: \n{}",out, self.additional_information)
     }
 
-    pub fn split_by_bold_titles(input: &str) -> BugSub {
+
+    pub async fn get_recommended_options(&mut self) {
+        let bug_sub_str = self.to_string();
+        let request = gpt35![
+            system!("based on the following bug report, ENUMERATE a list of things the user can try while waiting for a solution. Provide ONLY the list of options."),
+            user!(bug_sub_str),
+        ].get().await;
+        match request {
+            Ok(response) => {
+                self.recommend_user_actions = response.default_choice();
+            },
+            Err(_) => {}
+        }
+    }
+
+    pub async fn get_severity(&mut self) {
+        let bug_sub_str = self.to_string();
+        let request = gpt35![
+            system!("based on the following bug report, choose a severity of either LOW, MEDIUM, or HIGH. DO NOT give a breakdown, only provide a SINGLE WORD as an answer."),
+            user!(bug_sub_str),
+        ].get().await;
+        match request {
+            Ok(response) => {
+                self.severity = response.default_choice();
+            },
+            Err(_) => {}
+        }
+    }
+    
+    pub async fn get_description(&mut self) {
+        let bug_sub_str = self.to_string();
+        let request = gpt35![
+            system!("make up a VERY SHORT description for the following bug report:"),
+            user!(bug_sub_str),
+        ].get().await;
+        match request {
+            Ok(response) => {
+                self.description = response.default_choice();
+            },
+            Err(_) => {}
+        }
+    }
+
+    pub async fn get_title(&mut self) {
+        let bug_sub_str = self.to_string();
+        let request = gpt35![
+            system!("make up a VERY SHORT title for the following bug report:"),
+            user!(bug_sub_str),
+        ].get().await;
+        match request {
+            Ok(response) => {
+                self.title = response.default_choice();
+            },
+            Err(_) => {}
+        }
+    }
+
+    pub fn load_from_autofill(input: &str) -> BugSub {
         let mut bug_sub = BugSub {
-            summary: String::new(),
-            environment: String::new(),
-            steps_to_reproduce: String::new(),
-            expected_behavior: String::new(),
             actual_behavior: String::new(),
-            error_messages: String::new(),
             additional_information: String::new(),
+            assigned_to: String::new(),
+            description: String::new(),
+            environment: String::new(),
+            error_messages: String::new(),
+            expected_behavior: String::new(),
+            recommend_user_actions: String::new(),
+            steps_to_reproduce: String::new(),
+            summary: String::new(),
+            severity: String::new(),
+            title: String::new(),
         };
 
         let mut current_section = String::new();
@@ -111,38 +182,75 @@ impl BugSub {
         match request {
             Ok(response) => {
                 let input_text = response.default_choice();
-                Some(BugSub::split_by_bold_titles(&input_text))
+                Some(BugSub::load_from_autofill(&input_text))
             },
             Err(_) => {None}
         }
     }
 }
+macro_rules! set_text_by_id {
+    ($name:literal, $content:expr) => {
+        {
+            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+            let element = document.get_element_by_id($name).ok_or_else(|| JsValue::from_str("Element not found"))?;
+            element.set_inner_html($content);
+        }
+    };
+}
+
+macro_rules! get_text_by_id {
+    ($name:literal) => {
+        {
+            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+            let element = document.get_element_by_id($name).ok_or_else(|| JsValue::from_str("Element not found"))?;
+            element.text_content().ok_or_else(|| JsValue::from_str("Failed to get inner text"))?
+        }
+    };
+}
+
+#[wasm_bindgen]
+pub async fn build_bugsub() -> Result<JsValue, JsValue>{
+    let mut bug_sub = BugSub {
+        actual_behavior: get_text_by_id!("actualBehavior"),
+        additional_information: get_text_by_id!("additionalInformation"),
+        assigned_to: String::new(),
+        description: String::new(),
+        environment: get_text_by_id!("environment"),
+        error_messages: get_text_by_id!("errorMessages"),
+        expected_behavior: get_text_by_id!("expectedBehavior"),
+        recommend_user_actions: String::new(),
+        steps_to_reproduce: get_text_by_id!("stepsToReproduce"),
+        summary: get_text_by_id!("summary"),
+        severity: String::new(),
+        title: String::new(),
+    };
+    bug_sub.get_recommended_options().await;
+    bug_sub.get_title().await;
+    bug_sub.get_description().await;
+    bug_sub.get_severity().await;
+
+    let test = format!("Recommended Actions:\n{}\nTitle:\n{}\nDesc:\n{}\nSeverity:\n{}", &bug_sub.recommend_user_actions, &bug_sub.title,
+                       &bug_sub.description, &bug_sub.severity);
+
+    Ok(JsValue::from_str(&test))
+}
 
 #[wasm_bindgen]
 pub async fn autofill_form(pass: String) -> Result<JsValue, JsValue>{
     if check_passcode(&pass, super::HASH) {
-        let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
-
         let key = xor_decrypt(&super::OPENAI_API_KEY, &pass);
         openai_api::key::set_api_key(key);
 
         let bug_sub = BugSub::gpt_autofill().await;
 
         if let Some(bug_sub) = bug_sub {
-            let element = document.get_element_by_id("summary").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.summary);
-            let element = document.get_element_by_id("environment").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.environment);
-            let element = document.get_element_by_id("stepsToReproduce").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.steps_to_reproduce);
-            let element = document.get_element_by_id("expectedBehavior").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.expected_behavior);
-            let element = document.get_element_by_id("actualBehavior").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.actual_behavior);
-            let element = document.get_element_by_id("errorMessages").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.error_messages);
-            let element = document.get_element_by_id("additionalInformation").ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html(&bug_sub.additional_information);
+            set_text_by_id!("summary", &bug_sub.summary);
+            set_text_by_id!("environment", &bug_sub.environment);
+            set_text_by_id!("stepsToReproduce", &bug_sub.steps_to_reproduce);
+            set_text_by_id!("expectedBehavior", &bug_sub.expected_behavior);
+            set_text_by_id!("actualBehavior", &bug_sub.actual_behavior);
+            set_text_by_id!("errorMessages", &bug_sub.error_messages);
+            set_text_by_id!("additionalInformation", &bug_sub.additional_information);
         } else {
             return Err(JsValue::FALSE);
         }
