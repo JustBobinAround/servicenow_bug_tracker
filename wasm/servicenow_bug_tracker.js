@@ -210,20 +210,12 @@ function __wbg_adapter_24(arg0, arg1, arg2) {
 
 /**
 * @param {string} pass
-* @returns {boolean}
-*/
-export function is_passcode_correct(pass) {
-    const ptr0 = passStringToWasm0(pass, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.is_passcode_correct(ptr0, len0);
-    return ret !== 0;
-}
-
-/**
 * @returns {Promise<any>}
 */
-export function build_bugsub() {
-    const ret = wasm.build_bugsub();
+export function build_bugsub(pass) {
+    const ptr0 = passStringToWasm0(pass, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.build_bugsub(ptr0, len0);
     return takeObject(ret);
 }
 
@@ -236,6 +228,17 @@ export function autofill_form(pass) {
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.autofill_form(ptr0, len0);
     return takeObject(ret);
+}
+
+/**
+* @param {string} pass
+* @returns {boolean}
+*/
+export function is_passcode_correct(pass) {
+    const ptr0 = passStringToWasm0(pass, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.is_passcode_correct(ptr0, len0);
+    return ret !== 0;
 }
 
 function handleError(f, args) {
@@ -549,8 +552,8 @@ function __wbg_get_imports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper331 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 116, __wbg_adapter_24);
+    imports.wbg.__wbindgen_closure_wrapper356 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 128, __wbg_adapter_24);
         return addHeapObject(ret);
     };
 

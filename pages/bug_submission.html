@@ -70,7 +70,7 @@
                     if (is_form_filled) {
                         submit_button.style.display = 'none';
                         document.getElementById('submit-loading-spinner').style.display = 'block';
-                        build_bugsub().then(result => {
+                        build_bugsub(passcode).then(result => {
                             alert(result);
                             submit_button.style.display = 'block';
                             document.getElementById('submit-loading-spinner').style.display = 'none';

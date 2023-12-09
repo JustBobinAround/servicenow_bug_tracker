@@ -37,15 +37,9 @@ pub mod prelude {
             .zip(key.chars().cycle()) 
             .map(|(c, k)| (c ^ k as u8) as char) 
             .collect();
-        input.trim_end().to_string()
+        input
     }
     pub fn xor_encrypt(input: &str, key: &str) -> Vec<u8> {
-        let mut input = input.to_string();
-        if input.len()<40 {
-            for i in (40-input.len())..=40 {
-                input.push(' ');
-            }
-        }
         input
             .chars()
             .zip(key.chars().cycle()) 

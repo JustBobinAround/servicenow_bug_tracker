@@ -1,11 +1,11 @@
 use openai_api::prelude::*;
 use wasm_bindgen::prelude::*;
 use wasm_env_crypt::prelude::*;
-use tokio::time::Duration;
+use reqwest::Client;
+use serde::{Serialize, Deserialize};
 
-pub struct BugTableItem {
-}
  
+#[derive(Serialize, Deserialize, Debug)]
 pub struct BugSub {
     actual_behavior: String,
     additional_information: String,
@@ -187,6 +187,19 @@ impl BugSub {
             Err(_) => {None}
         }
     }
+
+    pub async fn send_to_table(&self, pass: String) {
+        let url = "https://dev215866.service-now.com/api/now/table/x_1156972_bug_tr_0_bug_table";
+        let username = xor_decrypt(&super::SERVICENOW_USER, &pass);
+        let pass = xor_decrypt(&super::SERVICENOW_PASS, &pass);
+        let client = Client::new();
+        let response = client
+            .post(url)
+            .header(reqwest::header::ACCEPT, "application/json")
+            .basic_auth(username, Some(pass))
+            .json(&self) // Serialize the JSON body
+            .send().await;
+    }
 }
 macro_rules! set_text_by_id {
     ($name:literal, $content:expr) => {
@@ -206,10 +219,11 @@ macro_rules! get_text_by_id {
             element.text_content().ok_or_else(|| JsValue::from_str("Failed to get inner text"))?
         }
     };
+
 }
 
 #[wasm_bindgen]
-pub async fn build_bugsub() -> Result<JsValue, JsValue>{
+pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
     let mut bug_sub = BugSub {
         actual_behavior: get_text_by_id!("actualBehavior"),
         additional_information: get_text_by_id!("additionalInformation"),
@@ -228,9 +242,13 @@ pub async fn build_bugsub() -> Result<JsValue, JsValue>{
     bug_sub.get_title().await;
     bug_sub.get_description().await;
     bug_sub.get_severity().await;
+    bug_sub.send_to_table(pass).await;
 
-    let test = format!("Recommended Actions:\n{}\nTitle:\n{}\nDesc:\n{}\nSeverity:\n{}", &bug_sub.recommend_user_actions, &bug_sub.title,
+
+
+    let test = format!("Recommended Actions:\n{}\nTitle:\n{}\nDesc:\n{}\nSeverity:\n{}\nResponse:", &bug_sub.recommend_user_actions, &bug_sub.title,
                        &bug_sub.description, &bug_sub.severity);
+   
 
     Ok(JsValue::from_str(&test))
 }

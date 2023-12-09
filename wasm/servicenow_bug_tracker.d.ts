@@ -2,26 +2,27 @@
 /* eslint-disable */
 /**
 * @param {string} pass
-* @returns {boolean}
-*/
-export function is_passcode_correct(pass: string): boolean;
-/**
 * @returns {Promise<any>}
 */
-export function build_bugsub(): Promise<any>;
+export function build_bugsub(pass: string): Promise<any>;
 /**
 * @param {string} pass
 * @returns {Promise<any>}
 */
 export function autofill_form(pass: string): Promise<any>;
+/**
+* @param {string} pass
+* @returns {boolean}
+*/
+export function is_passcode_correct(pass: string): boolean;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly is_passcode_correct: (a: number, b: number) => number;
-  readonly build_bugsub: () => number;
+  readonly build_bugsub: (a: number, b: number) => number;
   readonly autofill_form: (a: number, b: number) => number;
+  readonly is_passcode_correct: (a: number, b: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
