@@ -10,3 +10,5 @@ export OPENAI_API_KEY="<YOUR API KEY>"
 ...
 ```
 
+### Notes
+See: [https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB0831585]

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <title>Bug Tracker</title>
 </head>
 <body>
@@ -20,104 +21,13 @@
                 <th>Priority</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
-            <tr>
-                <td class="important-cell"><a href="#bug1">1</a></td>
-                <td class="important-cell">UI Bug</td>
-                <td>Button alignment issue</td>
-                <td>Dep a</td>
-                <td>High</td>
-            </tr>
+        <tbody id="bug-tracker-body">
         </tbody>
     </table>
 
     <button class="fixed-bug-submission-button" onclick="window.location.href='bug_submission.html'">Add Bug</button>
     <script type="module">
-        import init, { is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
+        import init, { fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
         import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
         if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
             window.location.href="../index.html";
@@ -127,6 +37,8 @@
                 const passcode = get_cookie("service_now_demo");
                 if (is_passcode_correct(passcode)) {
                     document.body.style.display = "block";
+                    fill_table(passcode).then(result => {
+                    });
                 } else {
                     window.location.href="../index.html";
                 }

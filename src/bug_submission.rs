@@ -1,9 +1,75 @@
 use openai_api::prelude::*;
 use wasm_bindgen::prelude::*;
 use wasm_env_crypt::prelude::*;
-use reqwest::Client;
-use serde::{Serialize, Deserialize};
+use reqwest::{Client, Response};
+use serde::{self, Serialize, Deserialize};
 
+macro_rules! set_text_by_id {
+    ($name:literal, $content:expr) => {
+        {
+            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+            let element = document.get_element_by_id($name).ok_or_else(|| JsValue::from_str("Element not found"))?;
+            element.set_inner_html($content);
+        }
+    };
+}
+
+macro_rules! get_text_by_id {
+    ($name:literal) => {
+        {
+            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+            let element = document.get_element_by_id($name).ok_or_else(|| JsValue::from_str("Element not found"))?;
+            let text = element.text_content().ok_or_else(|| JsValue::from_str("Failed to get inner text"))?;
+            text
+        }
+    };
+
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TabelRequest {
+    result: Vec<BugSub>
+}
+
+impl TabelRequest {
+    pub async fn get_table(pass:String, amount: u32) -> Option<TabelRequest> {
+        let url = format!("https://dev215866.service-now.com/api/now/table/x_1156972_bug_tr_0_bug_table?sysparm_limit={}", amount);
+        let username = xor_decrypt(&super::SERVICENOW_USER, &pass);
+        let pass = xor_decrypt(&super::SERVICENOW_PASS, &pass);
+        let client = Client::new();
+        let response = client
+            .get(url)
+            .header(reqwest::header::ACCEPT, "application/json")
+            .basic_auth(username, Some(pass))
+            .send().await;
+
+        match response {
+            Ok(response) => {
+                let response: Result<TabelRequest, reqwest::Error> = response.json().await;
+                match response {
+                    Ok(bug_sub) => {
+                        Some(bug_sub)
+                    },
+                    Err(_) => {
+                        None
+                    }
+                }
+            },
+            Err(_) => {
+                None
+            }
+        }
+
+    }
+    pub async fn populate_table(&self) -> Result<JsValue, JsValue>{
+        for item in &self.result {
+            if item.add_to_table().is_err() {
+                return Err(JsValue::from_str("failed to add item to table"));
+            }
+        }
+        Ok(JsValue::from_str(&format!("{}",self.result.len())))
+    }
+}
  
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BugSub {
@@ -14,6 +80,8 @@ pub struct BugSub {
     environment: String,
     error_messages: String,
     expected_behavior: String,
+    #[serde(skip_serializing)]
+    number: String,
     recommend_user_actions: String,
     steps_to_reproduce: String,
     summary: String,
@@ -31,6 +99,38 @@ impl BugSub {
         let out = format!("{}\nActual Behavior: \n{}",out, self.actual_behavior);
         let out = format!("{}\nError Messages: \n{}",out, self.error_messages);
         format!("{}\nAdditional Information: \n{}",out, self.additional_information)
+    }
+
+    pub fn add_to_table(&self) -> Result<(), JsValue> {
+        let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+        let element = document.get_element_by_id("bug-tracker-body").ok_or_else(|| JsValue::from_str("Element not found"))?;
+        let tr = document.create_element("tr")?;
+        let td_id = document.create_element("td")?;
+        let a_id = document.create_element("a")?;
+        let td_title = document.create_element("td")?;
+        let td_desc = document.create_element("td")?;
+        let td_assigned_to = document.create_element("td")?;
+        let td_severity = document.create_element("td")?;
+
+        td_id.set_class_name("important-cell");
+        a_id.set_attribute("href", &format!("{}", self.number))?;
+        a_id.set_text_content(Some(&self.number));
+        td_id.append_child(&a_id)?;
+        td_title.set_class_name("important-cell");
+        td_title.set_text_content(Some(&self.title));
+        td_desc.set_text_content(Some(&self.description));
+        td_assigned_to.set_text_content(Some(&self.assigned_to));
+        td_severity.set_text_content(Some(&self.severity));
+
+        tr.append_child(&td_id)?;
+        tr.append_child(&td_title)?;
+        tr.append_child(&td_desc)?;
+        tr.append_child(&td_assigned_to)?;
+        tr.append_child(&td_severity)?;
+
+        element.append_child(&tr)?;
+
+        Ok(())
     }
 
 
@@ -99,6 +199,7 @@ impl BugSub {
             environment: String::new(),
             error_messages: String::new(),
             expected_behavior: String::new(),
+            number: String::new(),
             recommend_user_actions: String::new(),
             steps_to_reproduce: String::new(),
             summary: String::new(),
@@ -201,26 +302,6 @@ impl BugSub {
             .send().await;
     }
 }
-macro_rules! set_text_by_id {
-    ($name:literal, $content:expr) => {
-        {
-            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
-            let element = document.get_element_by_id($name).ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.set_inner_html($content);
-        }
-    };
-}
-
-macro_rules! get_text_by_id {
-    ($name:literal) => {
-        {
-            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
-            let element = document.get_element_by_id($name).ok_or_else(|| JsValue::from_str("Element not found"))?;
-            element.text_content().ok_or_else(|| JsValue::from_str("Failed to get inner text"))?
-        }
-    };
-
-}
 
 #[wasm_bindgen]
 pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
@@ -232,6 +313,7 @@ pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
         environment: get_text_by_id!("environment"),
         error_messages: get_text_by_id!("errorMessages"),
         expected_behavior: get_text_by_id!("expectedBehavior"),
+        number: String::from("1"),
         recommend_user_actions: String::new(),
         steps_to_reproduce: get_text_by_id!("stepsToReproduce"),
         summary: get_text_by_id!("summary"),
@@ -244,7 +326,7 @@ pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
     bug_sub.get_severity().await;
     bug_sub.send_to_table(pass).await;
 
-
+    bug_sub.add_to_table()?;
 
     let test = format!("Recommended Actions:\n{}\nTitle:\n{}\nDesc:\n{}\nSeverity:\n{}\nResponse:", &bug_sub.recommend_user_actions, &bug_sub.title,
                        &bug_sub.description, &bug_sub.severity);
@@ -274,4 +356,17 @@ pub async fn autofill_form(pass: String) -> Result<JsValue, JsValue>{
         }
     }    
     Ok(JsValue::TRUE)
+}
+
+#[wasm_bindgen]
+pub async fn fill_table(pass: String) -> Result<JsValue, JsValue> {
+    let mut table_len = JsValue::from_str("");
+    if check_passcode(&pass, super::HASH) {
+        if let Some(table) = TabelRequest::get_table(pass, 100).await {
+            table_len = table.populate_table().await?;
+        } else {
+            table_len = JsValue::from_str("failed to parse table");
+        }
+    }
+    Ok(table_len)
 }

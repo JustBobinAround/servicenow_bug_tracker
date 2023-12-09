@@ -3,6 +3,7 @@
 export const memory: WebAssembly.Memory;
 export function build_bugsub(a: number, b: number): number;
 export function autofill_form(a: number, b: number): number;
+export function fill_table(a: number, b: number): number;
 export function is_passcode_correct(a: number, b: number): number;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;

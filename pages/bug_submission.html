@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <title>Bug Submission</title>
 </head>
 
@@ -38,9 +39,23 @@
         <div id="submit-loading-spinner" class="loading"></div>
         <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
     </form>
+    <table>
+        <thead>
+            <tr>
+                <th class="important-cell">ID</th>
+                <th class="important-cell">Title</th>
+                <th>Description</th>
+                <th>Assigned To</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody id="bug-tracker-body">
+
+        </tbody>
+    </table>
     <pre id="jsonDisplay"></pre>
     <script type="module">
-        import init, { autofill_form, build_bugsub, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
+        import init, { autofill_form, build_bugsub, fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
         import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
         if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
             window.location.href="../index.html";
@@ -71,7 +86,6 @@
                         submit_button.style.display = 'none';
                         document.getElementById('submit-loading-spinner').style.display = 'block';
                         build_bugsub(passcode).then(result => {
-                            alert(result);
                             submit_button.style.display = 'block';
                             document.getElementById('submit-loading-spinner').style.display = 'none';
                             window.location.href="./bug_table.html";
