@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password-Protected Page</title>
+  <style>
+    #password-container {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="password-container">
+  <h2>Enter the password to access the content:</h2>
+  <input type="password" id="password-input">
+  <button onclick="check_password()">Submit</button>
+</div>
+
+<script type="module">
+    import init, { is_passcode_correct } from "./wasm/servicenow_bug_tracker.js";
+    import {cookie_exists, set_cookie, get_cookie} from "./js/cookies.js";
+
+    function check_password() {
+        const entered_password = document.getElementById("password-input").value;
+
+        if (is_passcode_correct(entered_password)) {
+            set_cookie("service_now_demo", entered_password, 7);
+            window.location.href='./pages/bug_table.html'
+        } else {
+            alert("Incorrect password. Please try again.");
+        }
+    }
+
+    function after_wasm_check() {
+        init().then(() => {
+            if (cookie_exists("service_now_demo")) {
+                const entered_password = get_cookie("service_now_demo");
+                if(is_passcode_correct(entered_password)) {
+                    window.location.href='./pages/bug_table.html'
+                } else {
+                    delete_cookie("service_now_demo");
+                }
+            }
+        });
+    }
+
+
+    if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
+        console.log("WebAssembly is supported in this browser!");
+        after_wasm_check();
+    } else {
+        console.log("WebAssembly is not supported in this browser.");
+        document.body.innerHTML = "<div>Sorry, your browser does not support WebAssembly.</div>";
+    }
+
+</script>
+
+</body>
+</html>
+

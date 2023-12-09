@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #loading-spinner {
+          display: none;
+        }
+
+
+        .loading {
+          display: inline-block;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-radius: 50%;
+          border-top: 4px solid #3498db;
+          width: 30px;
+          height: 30px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            display: none;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .autofill-submission-button {
+            background-color: #299df0;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .autofill-submission-button:hover {
+            background-color: #1f80c4;
+        }
+        
+        .cancel-submission-button {
+            background-color: #eb4034;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .cancel-submission-button:hover {
+            background-color: #b02e25;
+        }
+
+        .bug-submission-button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .bug-submission-button:hover {
+            background-color: #45a049;
+        }
+
+    </style>   
+    <title>Bug Submission</title>
+</head>
+
+<body>
+    <h1>Bug Submission Form</h1>
+    <form id="bugForm" onsubmit="event.preventDefault();" >
+        <button class="autofill-submission-button" id="autofill-button" type="button">Fill with random bug report</button>
+        <div id="loading-spinner" class="loading"></div>
+        <label for="summary">Summary:</label>
+        <textarea id="summary" name="summary" required></textarea>
+
+        <label for="environment">Environment:</label>
+        <textarea id="environment" name="environment" required></textarea>
+
+        <label for="stepsToReproduce">Steps to Reproduce:</label>
+        <textarea id="stepsToReproduce" name="stepsToReproduce" required></textarea>
+
+        <label for="expectedBehavior">Expected Behavior:</label>
+        <textarea id="expectedBehavior" name="expectedBehavior" required></textarea>
+
+        <label for="actualBehavior">Actual Behavior:</label>
+        <textarea id="actualBehavior" name="actualBehavior" required></textarea>
+
+        <label for="errorMessages">Error Messages:</label>
+        <textarea id="errorMessages" name="errorMessages" required></textarea>
+
+        <label for="additionalInformation">Additional Information:</label>
+        <textarea id="additionalInformation" name="additionalInformation" required></textarea>
+
+        <button class="bug-submission-button" type="submit", id="submit-button">Submit Bug</button>
+        <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
+    </form>
+    <pre id="jsonDisplay"></pre>
+    <script type="module">
+        import init, { autofill_form, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
+        import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
+        if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
+            window.location.href="../index.html";
+        }
+        init().then(() => {
+            if(cookie_exists("service_now_demo")) {
+                const passcode = get_cookie("service_now_demo");
+                if (is_passcode_correct(passcode)) {
+                    document.body.style.display = "block";
+                } else {
+                    window.location.href="../index.html";
+                }
+                var submit_button = document.getElementById('submit-button');
+                const form = document.getElementById("bugForm");
+                submit_button.addEventListener("click", () => {
+                    const formData = new FormData(form);
+                    const formDataObject = {};
+
+                    var is_form_filled = true;
+                    formData.forEach(function (value, key) {
+                        if (value=="") {
+                            is_form_filled = is_form_filled&&false;
+                        } 
+                        formDataObject[key] = value;
+                    });
+
+                    if (is_form_filled) {
+                        const jsonData = JSON.stringify(formDataObject);
+                        console.log(jsonData);
+                        document.getElementById("jsonDisplay").textContent = JSON.stringify(jsonData, null, 2);
+                        window.location.href="./bug_table.html";
+                    }
+                });
+                var autofill_button = document.getElementById('autofill-button');
+                autofill_button.addEventListener("click", () => {
+                    document.getElementById('loading-spinner').style.display = 'block';
+                    autofill_button.style.display = 'none';
+                    var result = autofill_form(passcode).then(() => {
+                        autofill_button.style.display = 'block';
+                        document.getElementById('loading-spinner').style.display = 'none';
+                    });
+                    if (!result) {
+                        console.log("failed to get gpt35 response");
+                    }
+                });
+            } else {
+                window.location.href="../index.html";
+            }
+        });
+   </script>
+</body>
+
+</html>
+
