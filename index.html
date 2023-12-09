@@ -13,28 +13,29 @@
 <body>
 
 <div id="password-container">
-  <h2>Enter the password to access the content:</h2>
+  <h2>Enter the passcode to view content:</h2>
   <input type="password" id="password-input">
-  <button onclick="check_password()">Submit</button>
+  <button id="enter-button">Enter</button>
 </div>
 
 <script type="module">
     import init, { is_passcode_correct } from "./wasm/servicenow_bug_tracker.js";
     import {cookie_exists, set_cookie, get_cookie} from "./js/cookies.js";
 
-    function check_password() {
-        const entered_password = document.getElementById("password-input").value;
-
-        if (is_passcode_correct(entered_password)) {
-            set_cookie("service_now_demo", entered_password, 7);
-            window.location.href='./pages/bug_table.html'
-        } else {
-            alert("Incorrect password. Please try again.");
-        }
-    }
-
     function after_wasm_check() {
         init().then(() => {
+            var enter_button = document.getElementById("enter-button");
+            enter_button.addEventListener("click", () => {
+                const entered_password = document.getElementById("password-input").value;
+
+                if (is_passcode_correct(entered_password)) {
+                    set_cookie("service_now_demo", entered_password, 7);
+                    window.location.href='./pages/bug_table.html'
+                } else {
+                    alert("Incorrect password. Please try again.");
+                }
+                
+            });
             if (cookie_exists("service_now_demo")) {
                 const entered_password = get_cookie("service_now_demo");
                 if(is_passcode_correct(entered_password)) {
