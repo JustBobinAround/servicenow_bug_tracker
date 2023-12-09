@@ -3,19 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/style.css">
   <title>Password-Protected Page</title>
   <style>
     #password-container {
       text-align: center;
     }
+    @keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        25%, 75% {
+            transform: translateX(-10px);
+        }
+        50% {
+            transform: translateX(10px);
+        }
+    }
+
+    .shake-password {
+        border: 1px solid red;
+        animation: shake 0.5s ease-in-out;
+    }
+
   </style>
 </head>
-<body>
+<body style="display: block;">
 
 <div id="password-container">
   <h2>Enter the passcode to view content:</h2>
-  <input type="password" id="password-input">
-  <button id="enter-button">Enter</button>
+  <input type="password" id="password-input"></input>
+  <button class="autofill-submission-button" id="enter-button" style="margin-left: 10px;">Enter</button>
 </div>
 
 <script type="module">
@@ -27,12 +45,19 @@
             var enter_button = document.getElementById("enter-button");
             enter_button.addEventListener("click", () => {
                 const entered_password = document.getElementById("password-input").value;
+                var password_field = document.getElementById("password-input");
 
                 if (is_passcode_correct(entered_password)) {
                     set_cookie("service_now_demo", entered_password, 7);
                     window.location.href='./pages/bug_table.html'
                 } else {
-                    alert("Incorrect password. Please try again.");
+                    password_field.classList.add('shake-password');
+
+                    setTimeout(function() {
+                        password_field.classList.remove('shake-password');
+                    }, 500);
+                    
+                    //alert("Incorrect password. Please try again.");
                 }
                 
             });
