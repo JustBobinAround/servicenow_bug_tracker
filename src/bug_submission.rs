@@ -207,6 +207,7 @@ impl BugSub {
             summary: String::new(),
             severity: String::new(),
             title: String::new(),
+            sys_id: String::new()
         };
 
         let mut current_section = String::new();
@@ -321,6 +322,7 @@ pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
         summary: get_text_by_id!("summary"),
         severity: String::new(),
         title: String::new(),
+        sys_id: String::new(),
     };
     bug_sub.get_recommended_options().await;
     bug_sub.get_title().await;
