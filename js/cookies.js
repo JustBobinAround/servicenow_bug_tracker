@@ -1,9 +1,9 @@
 export function cookie_exists(name) {
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookieArray = decodedCookie.split(';');
+    const decoded_cookie = decodeURIComponent(document.cookie);
+    const cookie_array = decoded_cookie.split(';');
 
-    for (let i = 0; i < cookieArray.length; i++) {
-        let cookie = cookieArray[i];
+    for (let i = 0; i < cookie_array.length; i++) {
+        let cookie = cookie_array[i];
         while (cookie.charAt(0) === ' ') {
             cookie = cookie.substring(1);
         }
@@ -16,18 +16,18 @@ export function cookie_exists(name) {
 }
 
 export function set_cookie(name, value, daysToExpire) {
-    const expirationDate = new Date();
-    expirationDate.setTime(expirationDate.getTime() + (daysToExpire * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + expirationDate.toUTCString();
+    const expiration_date = new Date();
+    expiration_date.setTime(expiration_date.getTime() + (daysToExpire * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + expiration_date.toUTCString();
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
 
 export function get_cookie(name) {
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookieArray = decodedCookie.split(';');
+    const decoded_cookie = decodeURIComponent(document.cookie);
+    const cookie_array = decoded_cookie.split(';');
     
-    for (let i = 0; i < cookieArray.length; i++) {
-        let cookie = cookieArray[i];
+    for (let i = 0; i < cookie_array.length; i++) {
+        let cookie = cookie_array[i];
         while (cookie.charAt(0) === ' ') {
             cookie = cookie.substring(1);
         }
