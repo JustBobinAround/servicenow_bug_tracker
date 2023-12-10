@@ -39,60 +39,65 @@
         <div id="submit-loading-spinner" class="loading"></div>
         <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
     </form>
+    <table>
+        <thead>
+            <tr>
+                <th class="important-cell">ID</th>
+                <th class="important-cell">Title</th>
+                <th>Description</th>
+                <th>Assigned To</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody id="bug-tracker-body">
+
+        </tbody>
+    </table>
     <script type="module">
-        import init, { autofill_form, build_bugsub, fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
-        import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
-        if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
-            window.location.href="../index.html";
-        }
-        init().then(() => {
-            if(cookie_exists("service_now_demo")) {
-                const passcode = get_cookie("service_now_demo");
-                if (is_passcode_correct(passcode)) {
-                    document.body.style.display = "block";
-                } else {
-                    window.location.href="../index.html";
+        import { autofill_form, build_bugsub } from "../wasm/servicenow_bug_tracker.js";
+        import { auth, check_wasm } from "../js/auth.js";
+
+        function load_bugsub(passcode) {
+            var submit_button = document.getElementById('submit-button');
+            const form = document.getElementById("bugForm");
+            submit_button.addEventListener("click", () => {
+                const formData = new FormData(form);
+                const formDataObject = {};
+
+                var is_form_filled = true;
+                formData.forEach(function (value, key) {
+                    if (value=="") {
+                        is_form_filled = is_form_filled&&false;
+                    } 
+                    formDataObject[key] = value;
+                });
+
+                if (is_form_filled) {
+                    submit_button.style.display = 'none';
+                    document.getElementById('submit-loading-spinner').style.display = 'block';
+                    build_bugsub(passcode).then(result => {
+                        submit_button.style.display = 'block';
+                        document.getElementById('submit-loading-spinner').style.display = 'none';
+                        window.location.href="./bug_table.html";
+                    });
                 }
-                var submit_button = document.getElementById('submit-button');
-                const form = document.getElementById("bugForm");
-                submit_button.addEventListener("click", () => {
-                    const formData = new FormData(form);
-                    const formDataObject = {};
-
-                    var is_form_filled = true;
-                    formData.forEach(function (value, key) {
-                        if (value=="") {
-                            is_form_filled = is_form_filled&&false;
-                        } 
-                        formDataObject[key] = value;
-                    });
-
-                    if (is_form_filled) {
-                        submit_button.style.display = 'none';
-                        document.getElementById('submit-loading-spinner').style.display = 'block';
-                        build_bugsub(passcode).then(result => {
-                            submit_button.style.display = 'block';
-                            document.getElementById('submit-loading-spinner').style.display = 'none';
-                            window.location.href="./bug_table.html";
-                        });
-                    }
+            });
+            var autofill_button = document.getElementById('autofill-button');
+            autofill_button.addEventListener("click", () => {
+                document.getElementById('loading-spinner').style.display = 'block';
+                autofill_button.style.display = 'none';
+                var result = autofill_form(passcode).then(() => {
+                    autofill_button.style.display = 'block';
+                    document.getElementById('loading-spinner').style.display = 'none';
                 });
-                var autofill_button = document.getElementById('autofill-button');
-                autofill_button.addEventListener("click", () => {
-                    document.getElementById('loading-spinner').style.display = 'block';
-                    autofill_button.style.display = 'none';
-                    var result = autofill_form(passcode).then(() => {
-                        autofill_button.style.display = 'block';
-                        document.getElementById('loading-spinner').style.display = 'none';
-                    });
-                    if (!result) {
-                        console.log("failed to get gpt35 response");
-                    }
-                });
-            } else {
-                window.location.href="../index.html";
-            }
-        });
+                if (!result) {
+                    console.log("failed to get gpt35 response");
+                }
+            });
+        }
+
+        check_wasm();
+        auth(load_bugsub);
    </script>
 </body>
 

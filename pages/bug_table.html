@@ -27,25 +27,16 @@
 
     <button class="fixed-bug-submission-button" onclick="window.location.href='bug_submission.html'">Add Bug</button>
     <script type="module">
-        import init, { fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
-        import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
-        if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
-            window.location.href="../index.html";
+        import { fill_table } from "../wasm/servicenow_bug_tracker.js";
+        import { auth, check_wasm } from "../js/auth.js";
+
+        function load_table(passcode) {
+            fill_table(passcode).then(result => {
+            });
         }
-        init().then(() => {
-            if(cookie_exists("service_now_demo")) {
-                const passcode = get_cookie("service_now_demo");
-                if (is_passcode_correct(passcode)) {
-                    document.body.style.display = "block";
-                    fill_table(passcode).then(result => {
-                    });
-                } else {
-                    window.location.href="../index.html";
-                }
-            } else {
-                window.location.href="../index.html";
-            }
-        });
+
+        check_wasm();
+        auth(load_table);
    </script>
 </body>
 </html>

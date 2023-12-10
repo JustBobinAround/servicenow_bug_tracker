@@ -12,27 +12,16 @@
 <body>
     <div id="bug-report-body"></div>
     <script type="module">
-        import init, { autofill_form, build_bugsub, get_bug_report, fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
-        import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
-        if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
-            window.location.href="../index.html";
-        }
-        init().then(() => {
-            if(cookie_exists("service_now_demo")) {
-                const passcode = get_cookie("service_now_demo");
-                if (is_passcode_correct(passcode)) {
-                    document.body.style.display = "block";
-                    var bug_sys_id = window.location.hash.substring(1);
+        import { build_bugsub, get_bug_report } from "../wasm/servicenow_bug_tracker.js";
+        import { auth, check_wasm } from "../js/auth.js";
 
-                    get_bug_report(passcode, bug_sys_id).then(result => {
-                    });
-                } else {
-                    window.location.href="../index.html";
-                }
-            } else {
-                window.location.href="../index.html";
-            }
-        });
+        function load_report(passcode) {
+            var bug_sys_id = window.location.hash.substring(1);
+            get_bug_report(passcode, bug_sys_id).then(result => { });
+        }
+
+        check_wasm();
+        auth(load_report);
    </script>
 </body>
 
