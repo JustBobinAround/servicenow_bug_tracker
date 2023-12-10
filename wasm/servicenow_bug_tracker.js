@@ -232,6 +232,20 @@ export function autofill_form(pass) {
 
 /**
 * @param {string} pass
+* @param {string} id
+* @returns {Promise<any>}
+*/
+export function get_bug_report(pass, id) {
+    const ptr0 = passStringToWasm0(pass, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.get_bug_report(ptr0, len0, ptr1, len1);
+    return takeObject(ret);
+}
+
+/**
+* @param {string} pass
 * @returns {Promise<any>}
 */
 export function fill_table(pass) {
@@ -259,7 +273,7 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-function __wbg_adapter_97(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_98(arg0, arg1, arg2, arg3) {
     wasm.wasm_bindgen__convert__closures__invoke2_mut__h601cc7bef29c97b2(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
@@ -512,7 +526,7 @@ function __wbg_get_imports() {
                 const a = state0.a;
                 state0.a = 0;
                 try {
-                    return __wbg_adapter_97(a, state0.b, arg0, arg1);
+                    return __wbg_adapter_98(a, state0.b, arg0, arg1);
                 } finally {
                     state0.a = a;
                 }
@@ -580,8 +594,8 @@ function __wbg_get_imports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper381 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 133, __wbg_adapter_24);
+    imports.wbg.__wbindgen_closure_wrapper395 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 139, __wbg_adapter_24);
         return addHeapObject(ret);
     };
 

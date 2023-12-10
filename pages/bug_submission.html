@@ -39,21 +39,6 @@
         <div id="submit-loading-spinner" class="loading"></div>
         <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
     </form>
-    <table>
-        <thead>
-            <tr>
-                <th class="important-cell">ID</th>
-                <th class="important-cell">Title</th>
-                <th>Description</th>
-                <th>Assigned To</th>
-                <th>Priority</th>
-            </tr>
-        </thead>
-        <tbody id="bug-tracker-body">
-
-        </tbody>
-    </table>
-    <pre id="jsonDisplay"></pre>
     <script type="module">
         import init, { autofill_form, build_bugsub, fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
         import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";

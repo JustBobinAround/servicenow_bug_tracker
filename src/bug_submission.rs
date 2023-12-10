@@ -27,6 +27,43 @@ macro_rules! get_text_by_id {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ReportRequest {
+    result: BugSub
+}
+
+impl ReportRequest {
+    pub async fn get_report(pass: String, id: String) -> Option<BugSub> {
+        let url = format!("https://dev215866.service-now.com/api/now/table/x_1156972_bug_tr_0_bug_table/{}", id);
+        let username = xor_decrypt(&super::SERVICENOW_USER, &pass);
+        let pass = xor_decrypt(&super::SERVICENOW_PASS, &pass);
+        let client = Client::new();
+        let response = client
+            .get(url)
+            .header(reqwest::header::ACCEPT, "application/json")
+            .basic_auth(username, Some(pass))
+            .send().await;
+
+        match response {
+            Ok(response) => {
+                let response: Result<ReportRequest, reqwest::Error> = response.json().await;
+                match response {
+                    Ok(bug_sub) => {
+                        Some(bug_sub.result)
+                    },
+                    Err(_) => {
+                        None
+                    }
+                }
+            },
+            Err(_) => {
+                None
+            }
+        }
+    }
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct TabelRequest {
     result: Vec<BugSub>
 }
@@ -103,6 +140,18 @@ impl BugSub {
         format!("{}\nAdditional Information: \n{}",out, self.additional_information)
     }
 
+    pub fn build_report(&self) -> Result<(), JsValue> {
+        let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+        let element = document.get_element_by_id("bug-report-body").ok_or_else(|| JsValue::from_str("Element not found"))?;
+        let report_title = document.create_element("h1")?;
+
+        let title_str = format!("Report: {}", self.number);
+        report_title.set_text_content(Some(&title_str));
+
+        element.append_child(&report_title)?;
+        Ok(())
+    }
+
     pub fn add_to_table(&self) -> Result<(), JsValue> {
         let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
         let element = document.get_element_by_id("bug-tracker-body").ok_or_else(|| JsValue::from_str("Element not found"))?;
@@ -115,7 +164,7 @@ impl BugSub {
         let td_severity = document.create_element("td")?;
 
         td_id.set_class_name("important-cell");
-        a_id.set_attribute("href", &format!("./pages/bug_item.html#{}", self.sys_id))?;
+        a_id.set_attribute("href", &format!("./bug_report.html#{}", self.sys_id))?;
         a_id.set_text_content(Some(&self.number));
         td_id.append_child(&a_id)?;
         td_title.set_class_name("important-cell");
@@ -360,6 +409,19 @@ pub async fn autofill_form(pass: String) -> Result<JsValue, JsValue>{
         }
     }    
     Ok(JsValue::TRUE)
+}
+
+#[wasm_bindgen]
+pub async fn get_bug_report(pass: String, id: String) -> Result<JsValue, JsValue> {
+    let mut err_msg = JsValue::from_str("");
+    if check_passcode(&pass, super::HASH) {
+        if let Some(table) = ReportRequest::get_report(pass, id).await {
+            table.build_report()?;
+        } else {
+            err_msg= JsValue::from_str("failed to parse report json");
+        }
+    }
+    Ok(err_msg)
 }
 
 #[wasm_bindgen]

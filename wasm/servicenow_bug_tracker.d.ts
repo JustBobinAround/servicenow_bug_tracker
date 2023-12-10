@@ -12,6 +12,12 @@ export function build_bugsub(pass: string): Promise<any>;
 export function autofill_form(pass: string): Promise<any>;
 /**
 * @param {string} pass
+* @param {string} id
+* @returns {Promise<any>}
+*/
+export function get_bug_report(pass: string, id: string): Promise<any>;
+/**
+* @param {string} pass
 * @returns {Promise<any>}
 */
 export function fill_table(pass: string): Promise<any>;
@@ -27,6 +33,7 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly build_bugsub: (a: number, b: number) => number;
   readonly autofill_form: (a: number, b: number) => number;
+  readonly get_bug_report: (a: number, b: number, c: number, d: number) => number;
   readonly fill_table: (a: number, b: number) => number;
   readonly is_passcode_correct: (a: number, b: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <title>Bug Report</title>
+</head>
+
+<body>
+    <div id="bug-report-body"></div>
+    <script type="module">
+        import init, { autofill_form, build_bugsub, get_bug_report, fill_table, is_passcode_correct } from "../wasm/servicenow_bug_tracker.js";
+        import {cookie_exists, set_cookie, get_cookie} from "../js/cookies.js";
+        if (!(typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")) {
+            window.location.href="../index.html";
+        }
+        init().then(() => {
+            if(cookie_exists("service_now_demo")) {
+                const passcode = get_cookie("service_now_demo");
+                if (is_passcode_correct(passcode)) {
+                    document.body.style.display = "block";
+                    var bug_sys_id = window.location.hash.substring(1);
+
+                    get_bug_report(passcode, bug_sys_id).then(result => {
+                    });
+                } else {
+                    window.location.href="../index.html";
+                }
+            } else {
+                window.location.href="../index.html";
+            }
+        });
+   </script>
+</body>
+
+</html>
+
+
