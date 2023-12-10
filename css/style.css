@@ -20,13 +20,13 @@ table {
 }
 
 .important-cell {
-    display: table-cell; /* or any other appropriate display value */
+    display: table-cell; 
 }
 
-/* Media query to hide elements on smaller screens */
+
 @media only screen and (max-width: 440px) {
     .important-cell {
-        display: table-cell; /* or any other appropriate display value */
+        display: table-cell; 
     }
     th, td {
         display: none;
@@ -80,10 +80,10 @@ th {
 #submit-loading-spinner {
     display: none;
 }
+
 #loading-spinner {
     display: none;
 }
-
 
 .loading {
     display: inline-block;
@@ -134,6 +134,7 @@ textarea {
     cursor: pointer;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
+
 .autofill-submission-button:hover {
     background-color: #1f80c4;
 }
@@ -148,6 +149,7 @@ textarea {
     cursor: pointer;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
+
 .cancel-submission-button:hover {
     background-color: #b02e25;
 }
