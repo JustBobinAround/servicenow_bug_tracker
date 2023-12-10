@@ -86,6 +86,8 @@ pub struct BugSub {
     steps_to_reproduce: String,
     summary: String,
     severity: String,
+    #[serde(skip_serializing)]
+    sys_id: String,
     title: String,
 }
 
@@ -113,7 +115,7 @@ impl BugSub {
         let td_severity = document.create_element("td")?;
 
         td_id.set_class_name("important-cell");
-        a_id.set_attribute("href", &format!("{}", self.number))?;
+        a_id.set_attribute("href", &format!("./pages/bug_item.html#{}", self.sys_id))?;
         a_id.set_text_content(Some(&self.number));
         td_id.append_child(&a_id)?;
         td_title.set_class_name("important-cell");
