@@ -5,6 +5,12 @@ body {
     display: none;
 }
 
+footer {
+    color: #333;
+    margin: 10px;
+    text-align: center;
+}
+
 h1, h2 {
     color: #333;
     text-align: center;
