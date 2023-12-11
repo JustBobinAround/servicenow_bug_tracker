@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc, Local, TimeZone, NaiveDateTime};
 use openai_api::prelude::*;
 use wasm_bindgen::prelude::*;
 use wasm_env_crypt::prelude::*;
@@ -232,7 +233,7 @@ impl BugSub {
         title.set_text_content(Some(&format!("Title: {}", self.title)));
         severity.set_text_content(Some(&format!("Severity: {}", self.severity)));
         assigned_to.set_text_content(Some(&format!("Assigned To: {}", self.assigned_to)));
-        created_on.set_text_content(Some(&format!("Created On: {}", self.sys_created_on)));
+        created_on.set_text_content(Some(&format!("Created On: {} UTC", self.sys_created_on)));
 
 
         summary.set_text_content(Some("Summary:"));
