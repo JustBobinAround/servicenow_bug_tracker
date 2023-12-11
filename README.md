@@ -38,6 +38,19 @@ is inspected. After the inspection, a list of simple things the user can try in
 the mean time to resolve the bug are generated and displayed. This way, the
 user may arrive at a temporary solution until the issue is fully fixed.
 
+### How ServiceNow Is Used as a Back-End
+ServiceNow has a very verbose REST API, maybe too verbose given the
+documentation is over 7000 pages long. In comparison, the scope of this program
+is very small and we will only be using the Table API. The Table API allows for
+requesting full tables, table rows, modifying tables, etc. Below is an
+example curl request to get a table as a json format:
+
+```bash
+curl "https://<DEV_INSTANCE>.service-now.com/api/now/table/<TABLE_NAME>?sysparm_limit=<REQUEST_AMOUNT>" \
+--request GET \
+--header "Accept:application/json" \
+--user '<USER>':'<PASS>'
+```
 
 ### Encrypted API Key with WASM
 **THIS IS A BAD IDEA, DO NOT USE IN PRODUCTION. YOU HAVE BEEN WARNED**
@@ -64,10 +77,11 @@ record the packets being sent and find out the tokens that way. Once again,
 cool idea, don't use in production.
 
 # Building
-This was built on NixOS. My Nix packages is not the most pure, so it will be a minute
-before I have full nix flake solution running. But you should mostly need
-`rust`, `wasm-pack`, and `python3.7` or greater. The important thing after those
-dependencies is to ensure your environment variables are properly set (see next section).
+This was built on NixOS. My Nix packages are not the most pure, so it will be a
+minute before I have full nix flake solution running. But you should mostly
+need `rust`, `wasm-pack`, and `python3 or some other http server for testing`.
+The important thing after those dependencies is to ensure your environment
+variables are properly set (see next section).
 
 ### Setting passcode on build
 Set the env variable `WASM_ENV_CRYPT` to the passcode you want before building.
@@ -81,5 +95,5 @@ export SERVICENOW_PASS="<YOUR API KEY>"
 ...
 ```
 
-### Notes
+### Notes For Me
 See: [https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB0831585]
