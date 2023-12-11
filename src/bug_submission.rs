@@ -334,7 +334,9 @@ impl BugSub {
         ].get().await;
         match request {
             Ok(response) => {
-                self.severity = response.default_choice();
+                let response = response.default_choice().replace("severity", "");
+                let response = response.replace("Severity", "");
+                self.severity = response.replace(":", "");
             },
             Err(_) => {}
         }
