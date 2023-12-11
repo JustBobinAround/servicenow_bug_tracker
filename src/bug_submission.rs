@@ -183,6 +183,8 @@ impl BugSub {
         let recommend_user_actions = document.create_element("h3")?;
         let recommend_user_actions_content = document.create_element("pre")?;
 
+        let back_button = document.create_element("button")?;
+
         report_id.set_text_content(Some(&format!("Report: {}", self.number)));
         title.set_text_content(Some(&format!("Title: {}", self.title)));
         severity.set_text_content(Some(&format!("Severity: {}", self.severity)));
@@ -213,6 +215,12 @@ impl BugSub {
         recommend_user_actions.set_text_content(Some("Recommended Actions to User:"));
         recommend_user_actions_content.set_text_content(Some(&self.recommend_user_actions));
 
+        back_button.set_class_name("bug-submission-button");
+        back_button.set_attribute("type", "button")?;
+        back_button.set_attribute("onclick", "window.location.href='./bug_table.html'")?;
+        back_button.set_attribute("type", "button")?;
+        back_button.set_text_content(Some("Back to Table"));
+
 
         element.append_child(&report_id)?;
         element.append_child(&title)?;
@@ -234,6 +242,7 @@ impl BugSub {
         element.append_child(&additional_information_content)?;
         element.append_child(&recommend_user_actions)?;
         element.append_child(&recommend_user_actions_content)?;
+        element.append_child(&back_button)?;
 
         Ok(())
     }
