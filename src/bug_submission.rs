@@ -338,6 +338,21 @@ impl BugSub {
             Err(_) => {}
         }
     }
+    //""
+
+    pub async fn get_department(&mut self) {
+        let bug_sub_str = self.to_string();
+        let request = gpt35![
+            system!("based on the following bug report, choose the MOST RELEVANT word of either IT, UI, BACKEND, or MANAGEMENT. DO NOT give a breakdown, only provide a SINGLE WORD as an answer."),
+            user!(bug_sub_str),
+        ].get().await;
+        match request {
+            Ok(response) => {
+                self.assigned_to = response.default_choice();
+            },
+            Err(_) => {}
+        }
+    }
 
     pub async fn get_severity(&mut self) {
         let bug_sub_str = self.to_string();
@@ -525,6 +540,7 @@ pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
         bug_sub.get_title().await;
         bug_sub.get_description().await;
         bug_sub.get_severity().await;
+        bug_sub.get_department().await;
         bug_sub.send_to_table(pass).await;
 
         bug_sub.add_to_table()?;
