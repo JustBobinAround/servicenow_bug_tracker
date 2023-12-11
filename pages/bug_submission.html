@@ -6,53 +6,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
+<style>
+    .bug-recommend-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f4f4f4;
+    }
+    #bug-inspecting-body{
+        display: none;
+        max-width: 800px; 
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #fff; 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    }
+    #bug-recommend-body{
+        display: none;
+        max-width: 800px; 
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #fff; 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    }
+    pre {
+        margin-left: 20px;
+        white-space: pre-wrap; 
+    }
+</style>
     <title>Bug Submission</title>
 </head>
 
 <body>
-    <h1>Bug Submission Form</h1>
-    <form id="bugForm" onsubmit="event.preventDefault();" >
-        <button class="autofill-submission-button" id="autofill-button" type="button">Fill with random bug report</button>
-        <div id="loading-spinner" class="loading"></div>
-        <label for="summary">Summary:</label>
-        <textarea id="summary" name="summary" required></textarea>
+    <div class="bug-recommend-container"> 
+        <div id="bug-submission-body"> 
+            <h1>Bug Submission Form</h1>
+            <form id="bugForm" onsubmit="event.preventDefault();" >
+                <button class="autofill-submission-button" id="autofill-button" type="button">Fill with random bug report</button>
+                <div id="loading-spinner" class="loading"></div>
+                <label for="summary">Summary:</label>
+                <textarea id="summary" name="summary" required></textarea>
 
-        <label for="environment">Environment:</label>
-        <textarea id="environment" name="environment" required></textarea>
+                <label for="environment">Environment:</label>
+                <textarea id="environment" name="environment" required></textarea>
 
-        <label for="stepsToReproduce">Steps to Reproduce:</label>
-        <textarea id="stepsToReproduce" name="stepsToReproduce" required></textarea>
+                <label for="stepsToReproduce">Steps to Reproduce:</label>
+                <textarea id="stepsToReproduce" name="stepsToReproduce" required></textarea>
 
-        <label for="expectedBehavior">Expected Behavior:</label>
-        <textarea id="expectedBehavior" name="expectedBehavior" required></textarea>
+                <label for="expectedBehavior">Expected Behavior:</label>
+                <textarea id="expectedBehavior" name="expectedBehavior" required></textarea>
 
-        <label for="actualBehavior">Actual Behavior:</label>
-        <textarea id="actualBehavior" name="actualBehavior" required></textarea>
+                <label for="actualBehavior">Actual Behavior:</label>
+                <textarea id="actualBehavior" name="actualBehavior" required></textarea>
 
-        <label for="errorMessages">Error Messages:</label>
-        <textarea id="errorMessages" name="errorMessages" required></textarea>
+                <label for="errorMessages">Error Messages:</label>
+                <textarea id="errorMessages" name="errorMessages" required></textarea>
 
-        <label for="additionalInformation">Additional Information:</label>
-        <textarea id="additionalInformation" name="additionalInformation" required></textarea>
+                <label for="additionalInformation">Additional Information:</label>
+                <textarea id="additionalInformation" name="additionalInformation" required></textarea>
 
-        <button class="bug-submission-button" type="submit", id="submit-button">Submit Bug</button>
-        <div id="submit-loading-spinner" class="loading"></div>
-        <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
-    </form>
-    <table style="display: none;">
-        <thead>
-            <tr>
-                <th class="important-cell">ID</th>
-                <th class="important-cell">Title</th>
-                <th>Description</th>
-                <th>Assigned To</th>
-                <th>Priority</th>
-            </tr>
-        </thead>
-        <tbody id="bug-tracker-body">
+                <button class="bug-submission-button" type="submit", id="submit-button">Submit Bug</button>
+                <button class="cancel-submission-button" type="button" onclick="window.location.href='./bug_table.html'">Cancel</button>
+            </form>
+            <table style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="important-cell">ID</th>
+                        <th class="important-cell">Title</th>
+                        <th>Description</th>
+                        <th>Assigned To</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody id="bug-tracker-body">
 
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
+        <div id="bug-inspecting-body"> 
+            <h1>Inspecting Bug Submission, Please Wait...</h1>
+            <div id="submit-loading-spinner" class="loading"></div>
+        </div>
+        <div id="bug-recommend-body"> 
+        </div>
+    </div>
     <script type="module">
         import { autofill_form, build_bugsub } from "../wasm/servicenow_bug_tracker.js";
         import { auth, check_wasm } from "../js/auth.js";
@@ -74,11 +113,15 @@
 
                 if (is_form_filled) {
                     submit_button.style.display = 'none';
-                    document.getElementById('submit-loading-spinner').style.display = 'block';
+                    document.getElementById('bug-submission-body').style.display = "none";
+                    document.getElementById('bug-inspecting-body').style.display = "block";
+                    document.getElementById('submit-loading-spinner').style.display = "block";
                     build_bugsub(passcode).then(result => {
                         submit_button.style.display = 'block';
+                        document.getElementById('bug-recommend-body').style.display = "block";
+                        document.getElementById('bug-inspecting-body').style.display = "none";
                         document.getElementById('submit-loading-spinner').style.display = 'none';
-                        window.location.href="./bug_table.html";
+                        //window.location.href="./bug_table.html";
                     });
                 }
             });

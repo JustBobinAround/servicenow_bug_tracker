@@ -135,6 +135,8 @@ pub struct BugSub {
     severity: String,
     #[serde(skip_serializing)]
     sys_id: String,
+    #[serde(skip_serializing)]
+    sys_created_on: String,
     title: String,
 }
 
@@ -150,6 +152,33 @@ impl BugSub {
         format!("{}\nAdditional Information: \n{}",out, self.additional_information)
     }
 
+    pub fn build_recommended(&self) -> Result<(), JsValue> {
+        let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+        let element = document.get_element_by_id("bug-recommend-body").ok_or_else(|| JsValue::from_str("Element not found"))?;
+
+        let title = document.create_element("h1")?;
+        let sub_title = document.create_element("h3")?;
+        let options = document.create_element("pre")?;
+        let back_button = document.create_element("button")?;
+
+        title.set_text_content(Some("Your bug has been submitted!"));
+        sub_title.set_text_content(Some("While waiting for our review, feel free to try the following:"));
+        options.set_text_content(Some(&self.recommend_user_actions));
+
+        back_button.set_class_name("bug-submission-button");
+        back_button.set_attribute("type", "button")?;
+        back_button.set_attribute("onclick", "window.location.href='./bug_table.html'")?;
+        back_button.set_attribute("type", "button")?;
+        back_button.set_text_content(Some("Back to Table"));
+
+        element.append_child(&title)?;
+        element.append_child(&sub_title)?;
+        element.append_child(&options)?;
+        element.append_child(&back_button)?;
+
+        Ok(())
+    }
+
     pub fn build_report(&self) -> Result<(), JsValue> {
         let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
         let element = document.get_element_by_id("bug-report-body").ok_or_else(|| JsValue::from_str("Element not found"))?;
@@ -158,6 +187,7 @@ impl BugSub {
         let title = document.create_element("h2")?;
         let severity = document.create_element("h3")?;
         let assigned_to = document.create_element("h3")?;
+        let created_on = document.create_element("h3")?;
 
         let summary = document.create_element("h3")?;
         let summary_content = document.create_element("pre")?;
@@ -189,6 +219,7 @@ impl BugSub {
         title.set_text_content(Some(&format!("Title: {}", self.title)));
         severity.set_text_content(Some(&format!("Severity: {}", self.severity)));
         assigned_to.set_text_content(Some(&format!("Assigned To: {}", self.assigned_to)));
+        created_on.set_text_content(Some(&format!("Created On: {}", self.sys_created_on)));
 
 
         summary.set_text_content(Some("Summary:"));
@@ -226,6 +257,7 @@ impl BugSub {
         element.append_child(&title)?;
         element.append_child(&severity)?;
         element.append_child(&assigned_to)?;
+        element.append_child(&created_on)?;
         element.append_child(&summary)?;
         element.append_child(&summary_content)?;
         element.append_child(&env_desc)?;
@@ -351,7 +383,8 @@ impl BugSub {
             summary: String::new(),
             severity: String::new(),
             title: String::new(),
-            sys_id: String::new()
+            sys_id: String::new(),
+            sys_created_on: String::new()
         };
 
         let mut current_section = String::new();
@@ -467,8 +500,10 @@ pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
         severity: String::new(),
         title: String::new(),
         sys_id: String::new(),
+        sys_created_on: String::new()
     };
     bug_sub.get_recommended_options().await;
+    bug_sub.build_recommended()?;
     bug_sub.get_title().await;
     bug_sub.get_description().await;
     bug_sub.get_severity().await;
