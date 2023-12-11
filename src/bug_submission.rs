@@ -14,6 +14,19 @@ macro_rules! set_text_by_id {
     };
 }
 
+macro_rules! get_textarea_val{
+    ($name:literal) => {
+        {
+            let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
+            let element = document
+                .get_element_by_id($name)
+                .ok_or_else(|| JsValue::from_str("Element not found"))?
+                .dyn_into::<web_sys::HtmlTextAreaElement>()?;
+            element.value()
+        }
+    };
+
+}
 macro_rules! get_text_by_id {
     ($name:literal) => {
         {
@@ -487,37 +500,42 @@ impl BugSub {
 
 #[wasm_bindgen]
 pub async fn build_bugsub(pass: String) -> Result<JsValue, JsValue>{
-    let mut bug_sub = BugSub {
-        actual_behavior: get_text_by_id!("actualBehavior"),
-        additional_information: get_text_by_id!("additionalInformation"),
-        assigned_to: String::new(),
-        description: String::new(),
-        environment: get_text_by_id!("environment"),
-        error_messages: get_text_by_id!("errorMessages"),
-        expected_behavior: get_text_by_id!("expectedBehavior"),
-        number: String::from("1"),
-        recommend_user_actions: String::new(),
-        steps_to_reproduce: get_text_by_id!("stepsToReproduce"),
-        summary: get_text_by_id!("summary"),
-        severity: String::new(),
-        title: String::new(),
-        sys_id: String::new(),
-        sys_created_on: String::new()
-    };
-    bug_sub.get_recommended_options().await;
-    bug_sub.build_recommended()?;
-    bug_sub.get_title().await;
-    bug_sub.get_description().await;
-    bug_sub.get_severity().await;
-    bug_sub.send_to_table(pass).await;
+    if check_passcode(&pass, super::HASH) {
+        let key = xor_decrypt(&super::OPENAI_API_KEY, &pass);
+        openai_api::key::set_api_key(key);
+        let mut bug_sub = BugSub {
+            actual_behavior: get_textarea_val!("actualBehavior"),
+            additional_information: get_textarea_val!("additionalInformation"),
+            assigned_to: String::new(),
+            description: String::new(),
+            environment: get_textarea_val!("environment"),
+            error_messages: get_textarea_val!("errorMessages"),
+            expected_behavior: get_textarea_val!("expectedBehavior"),
+            number: String::from("1"),
+            recommend_user_actions: String::new(),
+            steps_to_reproduce: get_textarea_val!("stepsToReproduce"),
+            summary: get_textarea_val!("summary"),
+            severity: String::new(),
+            title: String::new(),
+            sys_id: String::new(),
+            sys_created_on: String::new()
+        };
+        bug_sub.get_recommended_options().await;
+        bug_sub.build_recommended()?;
+        bug_sub.get_title().await;
+        bug_sub.get_description().await;
+        bug_sub.get_severity().await;
+        bug_sub.send_to_table(pass).await;
 
-    bug_sub.add_to_table()?;
+        bug_sub.add_to_table()?;
 
-    let test = format!("Recommended Actions:\n{}\nTitle:\n{}\nDesc:\n{}\nSeverity:\n{}\nResponse:", &bug_sub.recommend_user_actions, &bug_sub.title,
-                       &bug_sub.description, &bug_sub.severity);
-   
-
-    Ok(JsValue::from_str(&test))
+        let test = format!("Recommended Actions:\n{}\nTitle:\n{}\nDesc:\n{}\nSeverity:\n{}\nResponse:", &bug_sub.recommend_user_actions, &bug_sub.title,
+                           &bug_sub.description, &bug_sub.severity);
+        let test = format!("Summary:\n{}\nEnvironment\n{}\n",&bug_sub.summary, &bug_sub.environment);
+        Ok(JsValue::from_str(&test))
+    } else {
+        Err(JsValue::from_str("Invalid pass"))
+    }
 }
 
 #[wasm_bindgen]

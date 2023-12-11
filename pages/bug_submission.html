@@ -117,6 +117,7 @@
                     document.getElementById('bug-inspecting-body').style.display = "block";
                     document.getElementById('submit-loading-spinner').style.display = "block";
                     build_bugsub(passcode).then(result => {
+                        console.log(result);
                         submit_button.style.display = 'block';
                         document.getElementById('bug-recommend-body').style.display = "block";
                         document.getElementById('bug-inspecting-body').style.display = "none";
