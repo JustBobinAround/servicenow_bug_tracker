@@ -98,7 +98,17 @@ impl TabelRequest {
         }
 
     }
-    pub async fn populate_table(&self) -> Result<JsValue, JsValue>{
+    pub async fn populate_table(&mut self) -> Result<JsValue, JsValue>{
+        self.result.sort_by(|a,b|{
+            a.number
+                .trim_start_matches("BUG")
+                .trim_start_matches("0")
+                .parse().unwrap_or(0)
+                .cmp(&b.number
+                     .trim_start_matches("BUG")
+                     .trim_start_matches("0")
+                     .parse().unwrap_or(0))
+        });
         for item in &self.result {
             if item.add_to_table().is_err() {
                 return Err(JsValue::from_str("failed to add item to table"));
@@ -428,7 +438,7 @@ pub async fn get_bug_report(pass: String, id: String) -> Result<JsValue, JsValue
 pub async fn fill_table(pass: String) -> Result<JsValue, JsValue> {
     let mut table_len = JsValue::from_str("");
     if check_passcode(&pass, super::HASH) {
-        if let Some(table) = TabelRequest::get_table(pass, 100).await {
+        if let Some(mut table) = TabelRequest::get_table(pass, 100).await {
             table_len = table.populate_table().await?;
         } else {
             table_len = JsValue::from_str("failed to parse table");
