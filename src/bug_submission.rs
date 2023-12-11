@@ -153,12 +153,88 @@ impl BugSub {
     pub fn build_report(&self) -> Result<(), JsValue> {
         let document = web_sys::window().ok_or_else(|| JsValue::from_str("No window"))?.document().ok_or_else(|| JsValue::from_str("No document"))?;
         let element = document.get_element_by_id("bug-report-body").ok_or_else(|| JsValue::from_str("Element not found"))?;
-        let report_title = document.create_element("h1")?;
 
-        let title_str = format!("Report: {}", self.number);
-        report_title.set_text_content(Some(&title_str));
+        let report_id = document.create_element("h1")?;
+        let title = document.create_element("h2")?;
+        let severity = document.create_element("h3")?;
+        let assigned_to = document.create_element("h3")?;
 
-        element.append_child(&report_title)?;
+        let summary = document.create_element("h3")?;
+        let summary_content = document.create_element("pre")?;
+
+        let env_desc = document.create_element("h3")?;
+        let env_desc_content = document.create_element("pre")?;
+
+        let steps_to_reproduce = document.create_element("h3")?;
+        let steps_to_reproduce_content = document.create_element("pre")?;
+
+        let expected_behavior = document.create_element("h3")?;
+        let expected_behavior_content = document.create_element("pre")?;
+
+        let actual_behavior = document.create_element("h3")?;
+        let actual_behavior_content = document.create_element("pre")?;
+
+        let error_messages = document.create_element("h3")?;
+        let error_messages_content = document.create_element("pre")?;
+
+        let additional_information = document.create_element("h3")?;
+        let additional_information_content = document.create_element("pre")?;
+
+        let recommend_user_actions = document.create_element("h3")?;
+        let recommend_user_actions_content = document.create_element("pre")?;
+
+        report_id.set_text_content(Some(&format!("Report: {}", self.number)));
+        title.set_text_content(Some(&format!("Title: {}", self.title)));
+        severity.set_text_content(Some(&format!("Severity: {}", self.severity)));
+        assigned_to.set_text_content(Some(&format!("Assigned To: {}", self.assigned_to)));
+
+
+        summary.set_text_content(Some("Summary:"));
+        summary_content.set_text_content(Some(&self.summary));
+
+        env_desc.set_text_content(Some("Environment Description:"));
+        env_desc_content.set_text_content(Some(&self.description));
+
+        steps_to_reproduce.set_text_content(Some("Steps to Reproduce:"));
+        steps_to_reproduce_content.set_text_content(Some(&self.steps_to_reproduce));
+
+        expected_behavior.set_text_content(Some("Expected Behavior:"));
+        expected_behavior_content.set_text_content(Some(&self.expected_behavior));
+
+        actual_behavior.set_text_content(Some("Actual Behavior:"));
+        actual_behavior_content.set_text_content(Some(&self.actual_behavior));
+
+        error_messages.set_text_content(Some("Error Messages:"));
+        error_messages_content.set_text_content(Some(&self.error_messages));
+
+        additional_information.set_text_content(Some("Additional Information:"));
+        additional_information_content.set_text_content(Some(&self.additional_information));
+
+        recommend_user_actions.set_text_content(Some("Recommended Actions to User:"));
+        recommend_user_actions_content.set_text_content(Some(&self.recommend_user_actions));
+
+
+        element.append_child(&report_id)?;
+        element.append_child(&title)?;
+        element.append_child(&severity)?;
+        element.append_child(&assigned_to)?;
+        element.append_child(&summary)?;
+        element.append_child(&summary_content)?;
+        element.append_child(&env_desc)?;
+        element.append_child(&env_desc_content)?;
+        element.append_child(&steps_to_reproduce)?;
+        element.append_child(&steps_to_reproduce_content)?;
+        element.append_child(&expected_behavior)?;
+        element.append_child(&expected_behavior_content)?;
+        element.append_child(&actual_behavior)?;
+        element.append_child(&actual_behavior_content)?;
+        element.append_child(&error_messages)?;
+        element.append_child(&error_messages_content)?;
+        element.append_child(&additional_information)?;
+        element.append_child(&additional_information_content)?;
+        element.append_child(&recommend_user_actions)?;
+        element.append_child(&recommend_user_actions_content)?;
+
         Ok(())
     }
 

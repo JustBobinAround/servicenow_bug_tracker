@@ -6,11 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
+<style>
+    .bug-report-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f4f4f4;
+    }
+    #bug-report-body{
+        max-width: 800px; 
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #fff; 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    }
+    pre {
+        margin-left: 20px;
+        white-space: pre-wrap; 
+    }
+</style>
     <title>Bug Report</title>
 </head>
 
 <body>
-    <div id="bug-report-body"></div>
+    <div class="bug-report-container">
+        <div id="bug-report-body">
+        </div>
+    </div>
     <script type="module">
         import { build_bugsub, get_bug_report } from "../wasm/servicenow_bug_tracker.js";
         import { auth, check_wasm } from "../js/auth.js";
