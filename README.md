@@ -43,21 +43,25 @@ user may arrive at a temporary solution until the issue is fully fixed.
 **THIS IS A BAD IDEA, DO NOT USE IN PRODUCTION. YOU HAVE BEEN WARNED**
 
 Disclaimer and practicality aside, this is a interesting idea. Most of the
-time, API keys are handle as ENV variables on the server side. So if the client
+time, API keys are handled as ENV variables on the server side. So if the client
 needs to make a REST request, the server must act like a "proxy" for the
 client; taking the clients request, and forwarding it to the appropriate route
 so long as they have proper credentials. This raises the question, can we have
-client-side auth? Well, technically yes, we can serve our API keys encrypt with
-a passcode and authenticate with a has of the passcode. You then have to make
+client-side auth? Well, technically yes, we can serve our API keys encrypted with
+a passcode and authenticate with a hash of the passcode. You then have to make
 the assumption that your passcode and API-keys are perfectly random. The world
 is not perfect however... Since I am using ServiceNow, the allowed usernames
 and passwords are not very complex, and someone with a half-way decent GPU
 could probably crack the hash in no time. But once again, for a simple demo, it
 does not matter much. So what does the actual encryption architecture look like?
-The pass code hash follows the SHA512 standard and the actual encryption of the
+The passcode hash follows the SHA512 standard and the actual encryption of the
 keys is a rolling XOR function. This is not the best setup, but it's what I thought
 up in the meantime. If you want to see how this works in more depth, see `build.rs`
-and `./wasm_env_crypt/src/lib.rs`.
+and `./wasm_env_crypt/src/lib.rs`. 
+
+**Update:** I also realized another point of vulnerability is that someone could
+record the packets being sent and find out the tokens that way. Once again,
+cool idea, don't use in production.
 
 # Building
 This was built on NixOS. My Nix packages is not the most pure, so it will be a minute
