@@ -26,7 +26,11 @@
     </table>
 
     <button class="fixed-bug-submission-button" onclick="window.location.href='bug_submission.html'">Add Bug</button>
-    <footer>The source for this project can be found at: <a href="https://github.com/JustBobinAround/servicenow_bug_tracker">github.com/JustBobinAround/servicenow_bug_tracker</a></footer>
+    <footer>
+        <p><b>If the table is blank, the web app is not broke! My ServiceNow Instance is probably asleep...</b></p>
+        <p>The source for this project can be found at: <a
+            href="https://github.com/JustBobinAround/servicenow_bug_tracker">github.com/JustBobinAround/servicenow_bug_tracker</a></p>
+    </footer>
     <script type="module">
         import { fill_table } from "../wasm/servicenow_bug_tracker.js";
         import { auth, check_wasm } from "../js/auth.js";
